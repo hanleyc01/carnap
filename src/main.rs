@@ -115,17 +115,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("Simple Periodic Wave", ("sans-serif", 50).into_font())
-        .margin(5)
-        .x_label_area_size(500)
-        .y_label_area_size(500)
-        .build_cartesian_2d(test_displace[0]..test_displace[test_displace.len()-1], range[0]..range[range.len()-1])?;
+        .margin(5u32)
+        .x_label_area_size(50u32)
+        .y_label_area_size(50u32)
+        .build_cartesian_2d(0.4..1.0, -0.2..0.2)?;
   
     chart.configure_mesh().draw()?;
 
     println!("range generated");
 
     chart
-        .draw_series(LineSeries::new(std::iter::zip(test_displace, range), &RED))?
+        .draw_series(LineSeries::new(std::iter::zip(range, test_displace), &RED))?
         .label("Sample Sinusoidal Wave");
     chart
         .configure_series_labels()

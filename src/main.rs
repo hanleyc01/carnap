@@ -1,6 +1,7 @@
 
 use plotters::prelude::*;
 
+
 // +++ Physiological
 /// Filter
 struct Filter {
@@ -65,6 +66,11 @@ impl Cavity {
                 }
             }
         }
+    }
+
+    /// Constructor from resonance_frequency
+    fn from_freq(resonance_freq: f64, phase: Option<f64>) -> Self {
+        Self { resonance_freq, phase }
     }
 
     /// Amplify and dampen harmonics
@@ -209,29 +215,40 @@ fn fourier_synthesis(init_time: f64, fin_time: f64, step: f64, vect: Vec<SimpleW
 
 // +++
 
+/// Test which creates and filters a source wave, then displays it onto a png
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Test simple wave
-    let test_wave1: SimpleWave = SimpleWave::sine_wave(2., 0.);
-    let test_wave2: SimpleWave = SimpleWave::default();
+    let test_wave1: SimpleWave = SimpleWave::default();
+    let test_wave2: SimpleWave = SimpleWave::from_freq(6., 300., 1.3);
     let test_wave3: SimpleWave = SimpleWave::sine_wave(3.22, 1.);
 
+    let test_source = Source { complex_wave:  vec![test_wave1, test_wave2, test_wave3] };
+    let test_filter = Filter { 
+        pharynx: Cavity::from_freq(400.0, None),
+        oral: Cavity::from_freq(200.0, None),
+        round: Cavity::from_freq(0.0, None) 
+    };
+    let resultant: Vec<SimpleWave> = test_filter.formants(test_source);
+
+
     let init_time: f64 = 0.0;
-    let fin_time: f64 = 15.;
+    let fin_time: f64 = 30.;
     let step: f64 = 0.001;
     
-    let fourier = fourier_synthesis(init_time, fin_time, step, vec![test_wave1, test_wave2, test_wave3]);
+    let fourier = fourier_synthesis(init_time, fin_time, step, resultant);
     println!("wave generated!");
 
     // The chart
-    let root = BitMapBackend::new("2.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("source_filter_simulation.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("Complex Periodic Wave", ("sans-serif", 50).into_font())
         .margin(5u32)
         .x_label_area_size(50u32)
         .y_label_area_size(50u32)
-        .build_cartesian_2d(init_time/5.0..fin_time/5., -10.00..10.00)?;
-  
+        .build_cartesian_2d(init_time..fin_time, -330.00..330.00)?;
+        //.build_cartesian_2d(10.0..20.0, -20.00..20.00)?;
+ 
     chart.configure_mesh().draw()?;
 
     println!("wave drawn");

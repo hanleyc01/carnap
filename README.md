@@ -6,6 +6,6 @@ Simple Period Wave
 
 ![alt text](https://github.com/hanleyc01/carnap/blob/master/1.png?raw=true)
 
-Complex Period Wave Used Fourier Synthes
+Complex Period Wave Used Fourier Synthesis
 
 ![alt text](https://github.com/hanleyc01/carnap/blob/master/2.png?raw=true)

@@ -172,30 +172,39 @@ impl SimpleWave {
 
 /// Generates a range of time points given a specific step
 fn get_range(init_time: f64, fin_time: f64, step: f64) -> Vec<f64> {
-    let mut to_step = init_time;
     let mut range: Vec<f64> = Vec::new();
-    while to_step <= fin_time {
-        range.push(to_step);
-        to_step += step;
+
+    let mut t = init_time;
+    while t <= fin_time {
+        range.push(t);
+        t += step;
     }
 
     range
 }
 
 /// Fourier synthesis of several simple waves into a complex wave
-fn fourier_synthesis(init_time: f64, fin_time: f64, step: f64, vect: Vec<SimpleWave>) -> Vec<f64> {
+fn fourier_synthesis(init_time: f64, fin_time: f64, step: f64, vect: Vec<SimpleWave>) -> Vec<(f64, f64)> {
     let mut resultant: Vec<f64> = Vec::new();
     let displacements:Vec<Vec<f64>> = vect.iter().map(|wave| wave.displace_y(init_time, fin_time, step)).collect();
     
     for j in 0..displacements[0].len() {
-        let mut r_sum: f64 = 0.0;
+        
+        let mut resultant_sum = 0.;
         for i in 0..displacements.len() {
-            r_sum += displacements[i][j];
-        }
-        resultant.push(r_sum);
-    }
+            
+            resultant_sum += displacements[i][j];
 
-    resultant
+
+        }
+
+        resultant.push(resultant_sum);
+    
+        assert_eq!(displacements[0][j] + displacements[1][j] + displacements[2][j], resultant[j]);
+    } 
+    
+    let range = get_range(init_time, fin_time, step);
+    std::iter::zip(range, resultant).collect()
 }
 
 // +++
@@ -206,14 +215,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let test_wave2: SimpleWave = SimpleWave::default();
     let test_wave3: SimpleWave = SimpleWave::sine_wave(3.22, 1.);
 
-    let init_time = 0.0;
-    let fin_time = 15.;
-    let step = 0.001;
+    let init_time: f64 = 0.0;
+    let fin_time: f64 = 15.;
+    let step: f64 = 0.001;
     
     let fourier = fourier_synthesis(init_time, fin_time, step, vec![test_wave1, test_wave2, test_wave3]);
-
-    let range = get_range(init_time, fin_time, step);
-        
     println!("wave generated!");
 
     // The chart
@@ -224,14 +230,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(5u32)
         .x_label_area_size(50u32)
         .y_label_area_size(50u32)
-        .build_cartesian_2d(init_time..fin_time, -5.000..5.3000)?;
+        .build_cartesian_2d(init_time/5.0..fin_time/5., -10.00..10.00)?;
   
     chart.configure_mesh().draw()?;
 
     println!("wave drawn");
 
     chart
-        .draw_series(LineSeries::new(std::iter::zip(range, fourier), &RED))?
+        .draw_series(LineSeries::new(fourier ,&RED))?
         .label("Wave");
     chart
         .configure_series_labels()

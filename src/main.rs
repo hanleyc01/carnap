@@ -170,6 +170,7 @@ impl SimpleWave {
 
 }
 
+/// Generates a range of time points given a specific step
 fn get_range(init_time: f64, fin_time: f64, step: f64) -> Vec<f64> {
     let mut to_step = init_time;
     let mut range: Vec<f64> = Vec::new();
@@ -181,15 +182,36 @@ fn get_range(init_time: f64, fin_time: f64, step: f64) -> Vec<f64> {
     range
 }
 
+/// Fourier synthesis of several simple waves into a complex wave
+fn fourier_synthesis(init_time: f64, fin_time: f64, step: f64, vect: Vec<SimpleWave>) -> Vec<f64> {
+    let mut resultant: Vec<f64> = Vec::new();
+    let displacements:Vec<Vec<f64>> = vect.iter().map(|wave| wave.displace_y(init_time, fin_time, step)).collect();
+    
+    for j in 0..displacements[0].len() {
+        let mut r_sum: f64 = 0.0;
+        for i in 0..displacements.len() {
+            r_sum += displacements[i][j];
+        }
+        resultant.push(r_sum);
+    }
+
+    resultant
+}
+
 // +++
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Test simple wave
-    let test_wave: SimpleWave = SimpleWave::sine_wave(2., 1.);
+    let test_wave1: SimpleWave = SimpleWave::sine_wave(2., 0.);
+    let test_wave2: SimpleWave = SimpleWave::default();
+    let test_wave3: SimpleWave = SimpleWave::sine_wave(3., 1.);
+
     let init_time = 0.0;
     let fin_time = 15.;
     let step = 0.001;
-    let test_displace = test_wave.displace_y(init_time, fin_time, step);
+    
+    let fourier = fourier_synthesis(init_time, fin_time, step, vec![test_wave1, test_wave2, test_wave3]);
+
     let range = get_range(init_time, fin_time, step);
         
     println!("wave generated!");
@@ -209,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("wave drawn");
 
     chart
-        .draw_series(LineSeries::new(std::iter::zip(range, test_displace), &RED))?
+        .draw_series(LineSeries::new(std::iter::zip(range, fourier), &RED))?
         .label("Sample Sinusoidal Wave");
     chart
         .configure_series_labels()

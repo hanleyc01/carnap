@@ -132,7 +132,7 @@ impl SimpleWave {
     /// of 0.2 Pa
     fn default() -> Self {
         Self {
-            amplitude: 0.2,
+            amplitude: 4.,
             period: 1.0 / 440.0,
             frequency: 440.0,
             angular_frequency: 2.0 * std::f64::consts::PI * 440.0,
@@ -204,7 +204,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Test simple wave
     let test_wave1: SimpleWave = SimpleWave::sine_wave(2., 0.);
     let test_wave2: SimpleWave = SimpleWave::default();
-    let test_wave3: SimpleWave = SimpleWave::sine_wave(3., 1.);
+    let test_wave3: SimpleWave = SimpleWave::sine_wave(3.22, 1.);
 
     let init_time = 0.0;
     let fin_time = 15.;
@@ -217,10 +217,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("wave generated!");
 
     // The chart
-    let root = BitMapBackend::new("1.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("2.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("Simple Periodic Wave", ("sans-serif", 50).into_font())
+        .caption("Complex Periodic Wave", ("sans-serif", 50).into_font())
         .margin(5u32)
         .x_label_area_size(50u32)
         .y_label_area_size(50u32)
@@ -232,7 +232,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart
         .draw_series(LineSeries::new(std::iter::zip(range, fourier), &RED))?
-        .label("Sample Sinusoidal Wave");
+        .label("Wave");
     chart
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
